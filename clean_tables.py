@@ -19,6 +19,7 @@ def empty_table(conn, tables, num_list):
                     cursor.execute(f"TRUNCATE TABLE {tb} RESTART IDENTITY")
                     conn.commit()
                 print(f"All Tables are cleared... Done!")
+                break
         else:
             tb = tables[int(n_l)-1]
             cursor.execute(f"TRUNCATE TABLE {tb} RESTART IDENTITY")

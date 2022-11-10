@@ -1,2 +1,2 @@
-# Postgres-Clean-Database
-Postgres-Clean-Database
+# Usage:
+$ python clean_tables.py

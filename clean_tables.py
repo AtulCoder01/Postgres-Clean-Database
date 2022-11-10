@@ -13,10 +13,12 @@ def empty_table(conn, tables, num_list):
     cursor = conn.cursor()
     for n_l in num_list:
         if int(n_l) == 0:
-            for tb in tables:
-                cursor.execute(f"TRUNCATE TABLE {tb} RESTART IDENTITY")
-                conn.commit()
-            print(f"All Tables are cleared... Done!")
+            confirm = input("Do you want to truncate all the tables?[y|N] ")
+            if confirm.lower() in ["y", "yes"]
+                for tb in tables:
+                    cursor.execute(f"TRUNCATE TABLE {tb} RESTART IDENTITY")
+                    conn.commit()
+                print(f"All Tables are cleared... Done!")
         else:
             tb = tables[int(n_l)-1]
             cursor.execute(f"TRUNCATE TABLE {tb} RESTART IDENTITY")

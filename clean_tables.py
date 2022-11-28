@@ -9,6 +9,7 @@ creds = {
     "db_port": "5432",
 }
 
+
 def empty_table(conn, tables, num_list):
     cursor = conn.cursor()
     for n_l in num_list:
@@ -29,6 +30,16 @@ def empty_table(conn, tables, num_list):
             cursor.execute(f"TRUNCATE TABLE {tb} CASCADE")
             conn.commit()
             print(f"Table {n_l}. {tb} is cleared... Done!")
+
+def execute_query(conn, query):
+    cursor = conn.cursor()
+    cursor.execute(f"{query}")
+    data = cursor.fetchall()
+    conn.commit()
+    for dt in list(data):
+        for d in dt:
+            print(d, end="\t")
+        print()
 
 def show_tables(tables, columns, max_length_tb):
     n = 1
@@ -82,7 +93,8 @@ while True:
     print("1. Search the tables")
     print("2. Reset serach tables")
     print("3. Show tables")
-    print("4. Enter table number for make empty e.g 0 for all / 1, 2, 3,4...\n")
+    print("4. Enter table number for make empty e.g 0 for all / 1, 2, 3,4...")
+    print("5. Execute Query\n")
     i = input("Choose one option:> ")
     if i == "0":
         break
@@ -101,6 +113,25 @@ while True:
         print()
         num_list = num.split(",")
         empty_table(conn, tables, num_list)
+    elif i == "5":
+        query = None
+        while query not in ["exit", "exit()"]:
+            if query is None:
+                cursor = conn.cursor()
+                cursor.execute('SELECT version()')
+                data = cursor.fetchone()
+                conn.commit()
+                print(data[0])
+
+            query = input("sql\> ")
+
+            if query == "exit":
+                break
+
+            try:
+                execute_query(conn, query)
+            except Exception as e:
+                print(e)
     else:
         print("Wrong option. please try again")
     

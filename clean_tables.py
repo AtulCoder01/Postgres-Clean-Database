@@ -1,5 +1,4 @@
 import psycopg2
-from copy import deepcopy
 
 creds = {
     "db_name": "postgres",
@@ -8,7 +7,6 @@ creds = {
     "db_host": "postgresql",
     "db_port": "5432",
 }
-
 
 def empty_table(conn, tables, num_list):
     cursor = conn.cursor()
@@ -34,12 +32,19 @@ def empty_table(conn, tables, num_list):
 def execute_query(conn, query):
     cursor = conn.cursor()
     cursor.execute(f"{query}")
-    data = cursor.fetchall()
     conn.commit()
-    for dt in list(data):
-        for d in dt:
-            print(d, end="\t")
+    data = cursor.fetchall()
+    if len(data) > 0:
+        columns = [desc[0] for desc in cursor.description]
+        for col in columns:
+            print('*'+str(col)+'*', end="\t")
         print()
+        for dt in list(data):
+            for d in dt:
+                print(str(d), end="\t")
+            print()
+    else:
+        print("no records found.")
 
 def show_tables(tables, columns, max_length_tb):
     n = 1
@@ -82,7 +87,7 @@ for table in all_tables:
         max_length_tb = len(table[0])
 columns = 3
 max_length_tb += 30
-copy_tables = deepcopy(tables)
+copy_tables = tables.copy()
 
 
 print("\nAll Tables:\n")
@@ -122,6 +127,7 @@ while True:
                 data = cursor.fetchone()
                 conn.commit()
                 print(data[0])
+                print()
 
             query = input("sql\> ")
 
@@ -130,6 +136,7 @@ while True:
 
             try:
                 execute_query(conn, query)
+                print()
             except Exception as e:
                 print(e)
     else:

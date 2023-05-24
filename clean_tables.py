@@ -1,4 +1,5 @@
 import psycopg2
+from texttable import Texttable
 
 creds = {
     "db_name": "postgres",
@@ -6,6 +7,8 @@ creds = {
     "db_password": "password",
     "db_host": "postgresql",
     "db_port": "5432",
+    "no_of_column": 3,
+    "table_max_width": 160,
 }
 
 def empty_table(conn, tables, num_list):
@@ -46,29 +49,37 @@ def execute_query(conn, query):
     else:
         print("no records found.")
 
+def find_left_table(columns, max_length_tb):
+    tmp = columns
+    while True:
+        if tmp >= max_length_tb:
+            return tmp-max_length_tb
+        else:
+            tmp += columns
+
 def show_tables(tables, columns, max_length_tb):
-    n = 1
-    if len(tables) == 1:
-        for first in zip(tables[::columns]):
-            first = f"{n}. {first[0]}"
-            n+=1
-            print(f'{first}')      
-    elif len(tables) == 2: 
-        for first, second in zip(tables[::columns], tables[1::columns]):
-            first = f"{n}. {first}"
-            n+=1
-            second = f"{n}. {second}"
-            n+=1
-            print(f'{first: <{max_length_tb}}{second}')       
-    else: 
-        for first, second, third in zip(tables[::columns], tables[1::columns], tables[2::columns]):
-            first = f"{n}. {first}"
-            n+=1
-            second = f"{n}. {second}"
-            n+=1
-            third = f"{n}. {third}"
-            n+=1
-            print(f'{first: <{max_length_tb}}{second: <{max_length_tb}}{third}')       
+    new_table = [ f"{i+1}. {tb}" for i, tb in enumerate(tables)]
+    left_table = find_left_table(columns, max_length_tb)
+    i = 0
+    while i < left_table:
+        new_table.append("")
+        i += 1
+    new_max_length_tb = len(new_table)
+    t = Texttable(max_width= creds["table_max_width"])
+    
+    col_head = []
+    for k in range(columns):
+        col_head.append(f"Column {k+1}")
+    tem = [col_head]
+    i = 0
+    j = columns
+    while j <= new_max_length_tb:
+        tem.append(new_table[i:j])
+        i += columns
+        j += columns
+
+    t.add_rows(tem)
+    print(t.draw())
 
 #establishing the connection
 conn = psycopg2.connect(database = creds["db_name"], user = creds["db_user"], password = creds["db_password"], host = creds["db_host"], port = creds["db_port"])
@@ -85,7 +96,7 @@ for table in all_tables:
     tables.append(table[0])
     if len(table[0]) > 0:
         max_length_tb = len(table[0])
-columns = 3
+columns = creds["no_of_column"]
 max_length_tb += 30
 copy_tables = tables.copy()
 
